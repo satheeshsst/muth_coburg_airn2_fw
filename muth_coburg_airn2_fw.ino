@@ -104,7 +104,7 @@ float setPointBar = 0;
 float setPointKgf = 0;
 float correctionfactor = 190.0;
 unsigned int pressureMIN = 0;
-unsigned int pressureMAX = 255;
+unsigned int pressureMAX = 285;
 unsigned int pressureSensor[10];
 uint8_t setPoint = 25;
 uint8_t setTimer = 25;
@@ -262,30 +262,23 @@ unsigned long vac_timer_state =0;
 unsigned long vac_timer_SS =0;
 
 
-int tyire_mode =1;
-int vacumRelease_logic = 1;
-
 void drawTexture(void)
 {
   unsigned int i = 0;
   j = 6;
    u8g2.clearBuffer();
-  //  unsigned int no_cir = 5; 
+  //  unsigned int no_cir = 5;
     if ( operation_mode == 0){
     u8g2.setFont(u8g2_font_victoriabold8_8u   );
     u8g2.drawStr(0,13,"STD");
     }
     if (mode_LMV_HCV_1 == 0){
-   // if ( (setPoint >= 100 || operation_mode == 3) && operation_mode != 4 && operation_mode != 2 && operation_mode != 1 && config_mode_state == 0){
     u8g2.setFont(u8g2_font_victoriabold8_8u   );
-  if (tyire_mode == 1)  {u8g2.drawStr(30,13,"LMV/AIR");};
-  if (tyire_mode == 2)  {u8g2.drawStr(30,13,"HCV/AIR");};
-    } 
-   // if ( (setPoint <= 100 || operation_mode == 4) && operation_mode != 3 && operation_mode != 2 && operation_mode != 1 && config_mode_state == 0){
-   if (mode_LMV_HCV_1 == 1){
-      u8g2.setFont(u8g2_font_victoriabold8_8u   );
-      if (tyire_mode == 1)  {u8g2.drawStr(30,13,"LMV/N2");}
-      if (tyire_mode == 2)  {u8g2.drawStr(30,13,"HCV/N2");}
+    u8g2.drawStr(30, 13, "HCV");
+    }
+    if (mode_LMV_HCV_1 == 1){
+    //    u8g2.setFont(u8g2_font_victoriabold8_8u   );
+    //    u8g2.drawStr(30,13,"LMV");
     }
     
     if ( operation_mode == 2){
@@ -522,7 +515,7 @@ void draw_init(void) {
     u8g2.drawStr( 0, 85,buf2);
 
     u8g2.setFont(u8g2_font_6x10_tf);
-    u8g2.drawStr(170,124,"SW Ver:J51");
+    u8g2.drawStr(170,124,"SW Ver:J50");
     
   
   } while( u8g2.nextPage() );
@@ -748,22 +741,16 @@ int alm_time_count = 20;
         sensorRead(); 
          sensorRead1 = 0;
       if( pressureSensorValue == 0 ){i = alm_time_count+1;}
-      } 
-           vacumRelease_logic =1;
-           vacumRelease();
-        alarm_bit = 1;      
+      }
+        alarm_bit = 1;
+    // close type mouth
+    /* digitalWrite(vacummPressureLED, HIGH);
+     digitalWrite(vacummLED, HIGH);
+     delay(2000);
+     digitalWrite(vacummPressureLED, LOW);
+     digitalWrite(vacummLED, LOW);
+   */
     }
-}
-
-void vacumRelease(){
-  if (vacumRelease_logic ==1){
-           digitalWrite(vacummPressureLED, HIGH);
-           digitalWrite(vacummLED, HIGH);
-           delay(2500);
-           digitalWrite(vacummPressureLED, LOW);
-           digitalWrite(vacummLED, LOW);
-           vacumRelease_logic =0;
-  }
 }
 
 
@@ -772,18 +759,18 @@ void Button_Read(){
 
 if(digitalRead(mode_LMV_HCV) == LOW){
    mode_LMV_HCV_1 =  0;
-     if (mode_LMV_HCV_1_setbit == 1 && pressureSensorValue == 0  ){ 
-      setPoint = 40;  
+     if (mode_LMV_HCV_1_setbit == 1 && pressureSensorValue == 0  ){
+      setPoint = 110;
       get_ondelay_time ();
-      Display_referesh(); 
+      Display_referesh();
       }
-     mode_LMV_HCV_1_setbit = 0; 
+     mode_LMV_HCV_1_setbit = 0;
   }
   else {
      mode_LMV_HCV_1 =  1;
      if (mode_LMV_HCV_1_setbit == 0 && pressureSensorValue == 0  ){
-       setPoint = 40; 
-       get_ondelay_time (); 
+       setPoint = 30;
+       get_ondelay_time ();
        Display_referesh();}
      mode_LMV_HCV_1_setbit = 1;
     }
@@ -1045,10 +1032,6 @@ if(digitalRead(startStopButton) == LOW){
        Display_referesh();
        startStopButton_1 = debounce_time + 1;
        startStopButton_state = true;
-         if (startStop_mode_0 == 0){
-            vacumRelease_logic =1;
-            }
-          
      //  RS485_serial.print("startStop_mode 1 = "); RS485_serial.println(startStop_mode);
        
          }
@@ -1061,7 +1044,6 @@ if(digitalRead(startStopButton) == LOW){
           startStopButton_state = true;
         //  RS485_serial.print("startStop_mode 0 = "); RS485_serial.println(startStop_mode_0);
           if (startStop_mode_0 == 0){
-            vacumRelease_logic =1;
             Off_relays();
             }
             else{ Pressure_SetBit = HIGH; }
@@ -1346,8 +1328,7 @@ else {temp_setPoint = setPoint;}
 void get_ondelay_time () {
   
   if (setPoint < 80) {
-    tyire_mode =1;
-    offdelaytime = 2600; //6000//15mtr 
+    offdelaytime = 2600; //6000//15mtr
    /* PresureT1 = 120;
     PresureT2 = 250;
     PresureT3 = 700;   
@@ -1396,7 +1377,6 @@ void get_ondelay_time () {
   else { 
     
     offdelaytime = 2900;
-    tyire_mode =2;
     PresureT1 = 450 *10;
     PresureT2 = 1200 *10; //
     PresureT3 = 2600 *10;   
@@ -2019,8 +1999,7 @@ void loop(void) {
     eeprom_calib_pending = 0;
   }
   TyreCount();
- vacumRelease();
- 
+
    if (operation_mode == 0) { vac_timer_bit = 0;  Vac_mode_pressure = 0;  }
 
   if (operation_mode == 1 && endTimer == 1 && pressureSensorValue != 0 && startStop_mode == 0 )
