@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <EEPROM.h>
 
-//#define Debugmode 1
+#define Debugmode 1
 
 // ---- Hardware configuration: define exactly one board and one LCD type ----
 // #define BOARD_AVR128          // or
